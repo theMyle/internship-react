@@ -17,7 +17,7 @@ export default function PostInput({ addInput }: PostInputProps) {
 
         <div className="flex justify-center">
           <textarea
-            className="w-full h-38 rounded-2xl border-4 p-2"
+            className="w-full h-38 rounded-2xl border-4 p-2 text-2xl"
             value={content}
             onChange={
               (e) => {

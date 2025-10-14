@@ -17,6 +17,9 @@ export default function App() {
       className="flex flex-col justify-center min-h-screen items-center py-10 gap-4"
     >
 
+      <div className="bg-red-500 w-full h-20">
+      </div>
+
       <PostInput addInput={addPost} />
 
       {postList.map((content) => {
