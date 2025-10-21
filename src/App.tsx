@@ -1,38 +1,29 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { type User } from "./types";
+import type { User } from "./types";
 import UserCard from "./Components/UserCard";
 import NavBar from "./Components/NavBar";
+import { useQuery } from "@tanstack/react-query";
+import Loading from "./Components/Loading";
+import Error from "./Components/Error";
 
-const API = "https://jsonplaceholder.typicode.com/users";
-const DELAY = 1;
+let API = "https://jsonplaceholder.typicode.com/users";
+const DELAY = 5;
 
 export default function App() {
-
-  const [data, setData] = useState<User[]>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
   const [filterText, setFilterText] = useState("");
 
-  function fetchData2() {
-    setIsLoading(true);
-
-    fetch(API)
-      .then((res) => res.json())
-      .then((data) => {
-        return new Promise<User[]>((resolve) => {
-          setTimeout(() => resolve(data), DELAY * 1000);
-        })
-      })
-      .then((data) => setData(data))
-      .catch((err) => {
-        setError(err instanceof Error ? err : new Error(String(err)));
-      })
-      .finally(() => setIsLoading(false));
+  async function fetchData() {
+    const res = await fetch(API);
+    // to simulate slow internet - feature!
+    await new Promise((resolve) => setTimeout(resolve, 1000 * DELAY));
+    return res.json();
   }
 
-  useEffect(() => { fetchData2() }, []);
+  const { data, isLoading, isError } = useQuery<User[]>({
+    queryKey: ['users'],
+    queryFn: fetchData,
+  });
 
   function handleFilter(searchText: string) {
     if (!searchText) {
@@ -42,24 +33,24 @@ export default function App() {
     }
   }
 
+  if (isLoading) return <Loading />;
+  if (isError) return <Error />;
+
   return (
     <div className="h-full bg-[#D9C5B2]">
 
       <NavBar onClick={handleFilter} />
 
-      {isLoading && <div className="text-black">Loading....</div>}
-      {error && <div className="text-black">Error.....</div>}
-
       <div className="flex gap-5 flex-col justify-center items-center p-4 ">
 
         {
-          !error && !isLoading && !filterText && data?.map((user) => {
+          !filterText && data?.map((user) => {
             return <UserCard user={user} />
           })
         }
 
         {
-          filterText
+          filterText && !isLoading
           &&
           data?.filter(
             (item) => {
